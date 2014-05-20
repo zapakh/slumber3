@@ -1,5 +1,8 @@
 import posixpath
-import urlparse
+try:
+    import urlparse
+except ImportError:
+    from urllib import parse as urlparse
 
 import requests
 
@@ -34,7 +37,7 @@ class ResourceAttributesMixin(object):
             raise AttributeError(item)
 
         kwargs = {}
-        for key, value in self._store.iteritems():
+        for key, value in self._store.items():
             kwargs[key] = value
 
         kwargs.update({"base_url": url_join(self._store["base_url"], item)})
@@ -69,7 +72,7 @@ class Resource(ResourceAttributesMixin, object):
             return self
 
         kwargs = {}
-        for key, value in self._store.iteritems():
+        for key, value in self._store.items():
             kwargs[key] = value
 
         if id is not None:
@@ -123,15 +126,19 @@ class Resource(ResourceAttributesMixin, object):
 
         if resp.headers.get("content-type", None):
             content_type = resp.headers.get("content-type").split(";")[0].strip()
+            if type(resp.content) != type(''):
+                content = resp.content.decode()
+            else:
+                content = resp.content
 
             try:
                 stype = s.get_serializer(content_type=content_type)
             except exceptions.SerializerNotAvailable:
-                return resp.content
+                return content
 
-            return stype.loads(resp.content)
+            return stype.loads(content)
         else:
-            return resp.content
+            return content
 
     def get(self, **kwargs):
         resp = self._request("GET", params=kwargs)

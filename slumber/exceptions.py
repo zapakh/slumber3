@@ -10,7 +10,7 @@ class SlumberHttpBaseException(SlumberBaseException):
     """
 
     def __init__(self, *args, **kwargs):
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
             setattr(self, key, value)
         super(SlumberHttpBaseException, self).__init__(*args)
 
